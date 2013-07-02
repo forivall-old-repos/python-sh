@@ -472,6 +472,10 @@ class Command(object):
         # the output is being T'd to both the redirected destination and our
         # internal buffers
         "tee": None,
+        
+        # allows the 'zeroth' argument to be set; reverse of the behaviour of
+        # the executable argument of subprocess.Popen
+        "display_name": None,
     }
     
     # these are arguments that cannot be called together, because they wouldn't
@@ -837,10 +841,14 @@ class OProc(object):
 
             if self.call_args["tty_out"]:
                 self.setwinsize(1)
+                
+            executable = cmd[0]
+            if self.call_args["display_name"]:
+                cmd[0] = self.call_args["display_name"]
             
             # actually execute the process
-            if self.call_args["env"] is None: os.execv(cmd[0], cmd)
-            else: os.execve(cmd[0], cmd, self.call_args["env"])
+            if self.call_args["env"] is None: os.execv(executable, cmd)
+            else: os.execve(executable, cmd, self.call_args["env"])
 
             os._exit(255)
 
